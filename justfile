@@ -61,6 +61,26 @@ pgcli:
     @echo "Running server with postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB"
     docker exec -it ${POSTGRES_CONTAINER_NAME} pgcli "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"
 
+# Run a specific SQL file
+run-sql file:
+    @echo "🔧 Running {{file}}..."
+    docker exec -i ${POSTGRES_CONTAINER_NAME} psql \
+        -U ${POSTGRES_USER} \
+        -d ${POSTGRES_DB} \
+        < "sql/{{file}}"
+    @echo "✨ SQL execution complete!"
+
+# List available SQL files
+list-sql:
+    @echo "📜 Available SQL files:"
+    @ls -1 sql/*.sql | sed 's|sql/||'
+
+# Create a new SQL file
+new-sql filename:
+    @echo "📝 Creating new SQL file: {{filename}}"
+    @touch "sql/{{filename}}.sql"
+    @echo "-- Created on $(date)\n\n" > "sql/{{filename}}.sql"
+
 # Display help
 help:
     @echo "Available commands:"
@@ -71,3 +91,7 @@ help:
     @echo "  just ps       - List containers"
     @echo "  just rebuild  - Rebuild the containers"
     @echo "  just clean    - Remove all containers, networks, and images"
+    @echo "  just pgcli    - Connect to the db locally"
+    @echo "  just run-sql  - Run a specific SQL file"
+    @echo "  just list-sql - List available SQL files"
+    @echo "  just new-sql  - Create a new SQL file"
