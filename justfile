@@ -24,19 +24,19 @@ build:
 
 # Reset the database
 reset-db:
-    set -euo pipefail
-    echo "🗑️  Terminating existing connections..."
-    docker exec ${POSTGRES_CONTAINER_NAME} psql -U ${POSTGRES_USER} -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${POSTGRES_DB}' AND pid <> pg_backend_pid();"
-    echo "🗑️  Resetting database..."
-    docker exec -it ${POSTGRES_CONTAINER_NAME} psql \
+    @set -euo pipefail
+    @printf "\n(1/3)🗑️  Terminating existing connections...\n"
+    @docker exec ${POSTGRES_CONTAINER_NAME} psql -U ${POSTGRES_USER} -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${POSTGRES_DB}' AND pid <> pg_backend_pid();"
+    @printf "\n(2/3)🗑️  Resetting database...\n"
+    @docker exec -it ${POSTGRES_CONTAINER_NAME} psql \
         -U ${POSTGRES_USER} \
         -d postgres \
         -c "DROP DATABASE IF EXISTS ${POSTGRES_DB};"
-    docker exec -it ${POSTGRES_CONTAINER_NAME} psql \
+    @docker exec -it ${POSTGRES_CONTAINER_NAME} psql \
         -U ${POSTGRES_USER} \
         -d postgres \
         -c "CREATE DATABASE ${POSTGRES_DB};"
-    echo "✨ Database reset complete!" 
+    @printf "\n(3/3)✨ Database reset complete!\n"
 
 # View output from containers
 logs:
@@ -60,6 +60,10 @@ clean:
 pgcli:
     @echo "Running server with postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB"
     docker exec -it ${POSTGRES_CONTAINER_NAME} pgcli "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"
+
+# Run bash
+bash:
+    docker exec -it ${POSTGRES_CONTAINER_NAME} bash
 
 # Run a specific SQL file
 run-sql file:
